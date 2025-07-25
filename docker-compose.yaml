@@ -1,0 +1,25 @@
+services:
+  api:
+    stdin_open: true
+    tty: true
+    build: .
+    develop:
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: .
+          target: /app
+          # Exclude the project virtual environment
+
+
+        # Rebuild the image on changes to the `pyproject.toml`
+        - action: rebuild
+          path: ./pyproject.toml
+    # Expose port 8000
+    ports:
+      - 8000:8000
+    # start django project using uv run
+    command: |
+      uv run manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./divvywonga:/app/divvywonga

@@ -1,8 +1,8 @@
 """
-URL configuration for divvywonga project.
+URL configuration for blog project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+    https://docs.djangoproject.com/en/5.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,14 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path
-from django.urls import include
-from core.views import Index
+from users.views import RegisterView
+from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
-    path('', Index.as_view(), name='index'),
-    path('admin/', admin.site.urls),
-    path('users/', include('users.urls')),
-    path('tinymce/', include('tinymce.urls')),
+    path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('logout/', LogoutView.as_view(template_name='users/logout.html'), name='logout'),
+    path('register/', RegisterView.as_view(), name='register'),
 ]

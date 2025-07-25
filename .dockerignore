@@ -1,0 +1,48 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Development files
+.git/
+.gitignore
+.pytest_cache/
+.coverage
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if any)
+node_modules/
+
+# Documentation
+README.md
+*.md
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+
+# Logs
+*.log
+logs/
