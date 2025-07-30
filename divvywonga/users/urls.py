@@ -15,11 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from users.views import RegisterView
+from users.views import RegisterView, CreateGroupView
 from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
+    path('groups/create/', CreateGroupView.as_view(), name='create_group'),
 ]
