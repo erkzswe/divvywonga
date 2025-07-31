@@ -55,3 +55,6 @@ WORKDIR /app
 
 # Expose port
 EXPOSE 8000
+
+# Default command
+CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
