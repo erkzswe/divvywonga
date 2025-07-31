@@ -11,7 +11,6 @@ services:
           target: /app
           # Exclude the project virtual environment
 
-
         # Rebuild the image on changes to the `pyproject.toml`
         - action: rebuild
           path: ./pyproject.toml
@@ -20,6 +19,6 @@ services:
       - 8000:8000
     # start django project using uv run
     command: |
-      uv run manage.py runserver 0.0.0.0:8000
+      uv run /app/divvywonga/manage.py runserver 0.0.0.0:8000
     volumes:
       - ./divvywonga:/app/divvywonga
