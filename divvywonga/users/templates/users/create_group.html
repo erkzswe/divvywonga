@@ -1,0 +1,230 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<!-- Choices.js for better select elements -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+<style>
+    .choices__list--multiple .choices__item {
+        background-color: #0d6efd;
+        border: 1px solid #0a58ca;
+    }
+    .choices__list--dropdown .choices__item--selectable {
+        padding-right: 1rem;
+    }
+    .choices__list--dropdown .choices__item--selectable::after {
+        right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New Group</h4>
+                    <p class="mb-0 small">Create a new group and invite members</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="groupForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Group Info -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Group Information</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ form.name|as_crispy_field }}
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Invite Members -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Invite Members</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.invite_role|as_crispy_field }}
+                                </div>
+                                {{ form.invite_users|as_crispy_field }}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i> You can invite more members later from the group settings.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'index' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-people-fill"></i> Create Group
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if user_groups %}
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Your Groups</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for membership in user_groups %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ membership.group.name }}</h6>
+                            <small class="text-muted">{{ membership.group.description|truncatechars:60|default:"No description" }}</small>
+                        </div>
+                        {% if membership.role == 'admin' %}
+                            <span class="badge bg-primary rounded-pill">
+                        {% elif membership.role == 'moderator' %}
+                            <span class="badge bg-info rounded-pill">
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill">
+                        {% endif %}
+                            {{ membership.get_role_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include Choices.js for better select elements -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Choices.js for the invite users select
+    const inviteUsers = document.querySelector('select[name="invite_users"]');
+    if (inviteUsers) {
+        // Convert the select to a text input for better UX
+        const choices = new Choices(inviteUsers, {
+            removeItemButton: true,
+            searchEnabled: true,
+            placeholder: true,
+            placeholderValue: 'Type email to search users...',
+            searchPlaceholderValue: 'Type email to search users',
+            itemSelectText: 'Click to select',
+            shouldSort: false,
+            searchResultLimit: 10,
+            searchFields: ['label', 'value'],
+            addItems: true,
+            addItemText: (value) => {
+                // Allow adding custom email addresses
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(value)) {
+                    return `Invite <strong>${value}</strong> (new user)`;
+                }
+                return false;
+            },
+            addItemFilter: (value) => {
+                // Only allow valid email addresses
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(value);
+            },
+            noResultsText: 'No users found. Press enter to invite by email.',
+            noChoicesText: 'No more users to add',
+            itemSelectText: 'Press to select',
+            classNames: {
+                containerOuter: 'choices w-100',
+                containerInner: 'choices__inner',
+                input: 'choices__input',
+                list: 'choices__list',
+                listSingle: 'choices__list--single',
+                listDropdown: 'choices__list--dropdown',
+                item: 'choices__item',
+                itemSelectable: 'choices__item--selectable',
+                itemDisabled: 'choices__item--disabled',
+                itemChoice: 'choices__item--choice',
+                placeholder: 'choices__placeholder',
+                group: 'choices__group',
+                button: 'choices__button',
+                activeState: 'is-active',
+                focusState: 'is-focused',
+                openState: 'is-open',
+                disabledState: 'is-disabled',
+                highlightedState: 'is-highlighted',
+                selectedState: 'is-selected',
+                flippedState: 'is-flipped',
+                loadingState: 'is-loading',
+                noResults: 'has-no-results',
+                noChoices: 'has-no-choices'
+            }
+        });
+
+        // Handle AJAX search for users
+        const searchInput = inviteUsers.parentElement.querySelector('.choices__input');
+        if (searchInput) {
+            searchInput.addEventListener('search', async (e) => {
+                const searchTerm = e.target.value.trim();
+                if (searchTerm.length < 2) return;
+
+                try {
+                    const response = await fetch(`/api/users/search/?q=${encodeURIComponent(searchTerm)}`);
+                    if (response.ok) {
+                        const users = await response.json();
+                        const currentValues = choices.getValue(true);
+                        const existingValues = currentValues.map(item => item.value);
+                        
+                        // Add new users that aren't already selected
+                        users.forEach(user => {
+                            if (!existingValues.includes(user.id.toString())) {
+                                choices.setChoices([{
+                                    value: user.id,
+                                    label: user.email,
+                                    customProperties: {
+                                        username: user.username
+                                    }
+                                }], 'value', 'label', false);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error searching users:', error);
+                }
+            });
+        }
+    }
+    
+    // Add confirmation before leaving the page with unsaved changes
+    const form = document.getElementById('groupForm');
+    let formChanged = false;
+    
+    // Check for form changes
+    if (form) {
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                formChanged = true;
+            });
+        });
+        
+        // Handle form submission
+        form.addEventListener('submit', () => {
+            formChanged = false;
+        });
+        
+        // Warn before leaving with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
