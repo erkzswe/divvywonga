@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,42 +15,94 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Group',
+            name="Group",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name': 'Group',
-                'verbose_name_plural': 'Groups',
-                'ordering': ['name'],
+                "verbose_name": "Group",
+                "verbose_name_plural": "Groups",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Membership',
+            name="Membership",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('points', models.IntegerField(default=0, help_text='Points earned by the user in this group', validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(10000)])),
-                ('joined_at', models.DateTimeField(auto_now_add=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('role', models.CharField(choices=[('member', 'Member'), ('admin', 'Admin'), ('moderator', 'Moderator')], default='member', max_length=20)),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.group')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "points",
+                    models.IntegerField(
+                        default=0,
+                        help_text="Points earned by the user in this group",
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(10000),
+                        ],
+                    ),
+                ),
+                ("joined_at", models.DateTimeField(auto_now_add=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("member", "Member"),
+                            ("admin", "Admin"),
+                            ("moderator", "Moderator"),
+                        ],
+                        default="member",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="users.group"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Membership',
-                'verbose_name_plural': 'Memberships',
-                'ordering': ['-joined_at'],
-                'unique_together': {('user', 'group')},
+                "verbose_name": "Membership",
+                "verbose_name_plural": "Memberships",
+                "ordering": ["-joined_at"],
+                "unique_together": {("user", "group")},
             },
         ),
         migrations.AddField(
-            model_name='group',
-            name='members',
-            field=models.ManyToManyField(related_name='user_groups', through='users.Membership', to=settings.AUTH_USER_MODEL),
+            model_name="group",
+            name="members",
+            field=models.ManyToManyField(
+                related_name="user_groups",
+                through="users.Membership",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
