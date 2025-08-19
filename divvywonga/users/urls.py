@@ -14,12 +14,36 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.urls import path
-from users.views import RegisterView
+from users.views import (
+    RegisterView,
+    CreateGroupView,
+    GroupDetailView,
+    DeleteGroupView,
+    LeaveGroupView,
+    InviteToGroupView,
+)
 from django.contrib.auth.views import LoginView, LogoutView
 
+
 urlpatterns = [
-    path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
-    path('logout/', LogoutView.as_view(template_name='users/logout.html'), name='logout'),
-    path('register/', RegisterView.as_view(), name='register'),
+    # Authentication URLs
+    path("login/", LoginView.as_view(template_name="users/login.html"), name="login"),
+    path(
+        "logout/", LogoutView.as_view(template_name="users/logout.html"), name="logout"
+    ),
+    path("register/", RegisterView.as_view(), name="register"),
+    # Group URLs
+    path("groups/create/", CreateGroupView.as_view(), name="create_group"),
+    path("groups/<int:group_id>/", GroupDetailView.as_view(), name="group_detail"),
+    path(
+        "groups/<int:group_id>/delete/", DeleteGroupView.as_view(), name="delete_group"
+    ),
+    path("groups/<int:group_id>/leave/", LeaveGroupView.as_view(), name="leave_group"),
+    path(
+        "groups/<int:group_id>/invite/",
+        InviteToGroupView.as_view(),
+        name="invite_to_group",
+    ),
 ]
