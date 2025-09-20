@@ -4,10 +4,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Sum, Count, Q
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse
-from django.core.exceptions import ValidationError
+from django.db.models import Sum
 from users.forms import UserRegisterForm, GroupCreateForm, GroupInviteForm
 from users.models import Group, Membership
 
@@ -105,6 +102,18 @@ class CreateGroupView(LoginRequiredMixin, View):
             "users/create_group.html",
             {"form": form, "user_groups": user_groups},
         )
+
+
+class GroupListView(LoginRequiredMixin, View):
+    """View for listing groups that the current user is a member of."""
+
+    def get(self, request):
+        # Get all groups where the current user is a member
+        memberships = Membership.objects.filter(user=request.user).select_related(
+            "group"
+        )
+        groups = [membership.group for membership in memberships]
+        return render(request, "users/group_list.html", {"groups": groups})
 
 
 class GroupDetailView(LoginRequiredMixin, View):

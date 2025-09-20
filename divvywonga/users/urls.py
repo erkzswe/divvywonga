@@ -20,6 +20,7 @@ from users.views import (
     RegisterView,
     CreateGroupView,
     GroupDetailView,
+    GroupListView,
     DeleteGroupView,
     LeaveGroupView,
     InviteToGroupView,
@@ -35,6 +36,7 @@ urlpatterns = [
     ),
     path("register/", RegisterView.as_view(), name="register"),
     # Group URLs
+    path("groups/", GroupListView.as_view(), name="groups"),
     path("groups/create/", CreateGroupView.as_view(), name="create_group"),
     path("groups/<int:group_id>/", GroupDetailView.as_view(), name="group_detail"),
     path(

@@ -1,0 +1,89 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if groups %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">Your Groups</h1>
+        <p class="lead">All groups you're a member of</p>
+        <a href="{% url 'create_group' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Create New Group
+        </a>
+    </div>
+{% endif %}
+    <!-- Groups List -->
+    {% if groups %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for group in groups %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h2 class="h4 card-title mb-0">
+                            <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-dark">
+                                {{ group.name }}
+                            </a>
+                        </h2>
+                        <span class="badge bg-primary">
+                            {{ group.membership_set.count }} member{{ group.membership_set.count|pluralize }}
+                        </span>
+                    </div>
+                    
+                    {% if group.description %}
+                    <p class="card-text text-muted mb-3">
+                        {{ group.description|truncatewords:30 }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Created {{ group.created_at|timesince }} ago
+                        </small>
+                        <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary">
+                            View Group <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-people display-1 text-muted"></i>
+        </div>
+        <h3 class="h4 mb-3">You're not in any groups yet</h3>
+        <p class="text-muted mb-4">Create a new group or ask to join an existing one to get started.</p>
+        <a href="{% url 'create_group' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Create Your First Group
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: none;
+        border-radius: 0.75rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .card-title a {
+        transition: color 0.2s ease-in-out;
+    }
+    
+    .card-title a:hover {
+        color: #0d6efd !important;
+    }
+</style>
+{% endblock %}
