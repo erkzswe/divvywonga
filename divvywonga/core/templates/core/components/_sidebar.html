@@ -1,0 +1,42 @@
+
+<div class="homepage-sidebar">
+    <div class="sidebar-header">
+        <i class="bi bi-folder"></i>
+        <span>MY GROUPS</span>
+    </div>
+    
+    {% if user_groups %}
+        <ul class="list-group list-group-flush">
+            {% for membership in user_groups|slice:":5" %}
+            <li class="list-group-item">
+                <a href="{% url 'group_detail' membership.group.id %}" class="group-link">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="group-name">{{ membership.group.name }}</span>
+                        <span class="badge {% if membership.role == 'admin' %}bg-primary{% elif membership.role == 'moderator' %}bg-info{% else %}bg-secondary{% endif %} role-badge">
+                            {{ membership.get_role_display }}
+                        </span>
+                    </div>
+                    <small class="text-muted">{{ membership.points|default:0 }} points</small>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        {% if user_groups|length > 5 %}
+            <div class="sidebar-footer">
+                <a href="{% url 'groups' %}" class="view-all-link">
+                    <i class="bi bi-list-ul"></i>
+                    View all groups
+                    <span class="badge bg-secondary">{{ user_groups|length }}</span>
+                </a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p class="text-muted mb-3">You're not in any groups yet.</p>
+            <a href="{% url 'groups' %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-search me-1"></i>Browse Groups
+            </a>
+        </div>
+    {% endif %}
+</div>

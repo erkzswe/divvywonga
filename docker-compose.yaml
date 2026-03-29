@@ -5,20 +5,15 @@ services:
     build: .
     develop:
       watch:
-        # Sync the working directory with the `/app` directory in the container
-        - action: sync
-          path: .
-          target: /app
-          # Exclude the project virtual environment
-
-        # Rebuild the image on changes to the `pyproject.toml`
         - action: rebuild
           path: ./pyproject.toml
-    # Expose port 8000
     ports:
       - 8000:8000
-    # start django project using uv run
     command: |
       uv run /app/divvywonga/manage.py runserver 0.0.0.0:8000
     volumes:
       - ./divvywonga:/app/divvywonga
+      - db_data:/app/data
+
+volumes:
+  db_data:
