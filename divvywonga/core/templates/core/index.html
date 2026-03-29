@@ -1,5 +1,22 @@
 {% extends 'core/base.html' %}
+{% load ascii_art %}
 
 {% block content %}
-<h1>Welcome to the DivvyWonga App</h1>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        {% if user.is_authenticated %}
+            <aside class="col-lg-3 col-xl-2">
+                {% include 'core/components/_sidebar.html' %}
+            </aside>
+        {% endif %}
+        
+        <main class="{% if user.is_authenticated %}col-lg-9 col-xl-10{% else %}col-12{% endif %}">
+            <div class="ascii-container py-5">
+                <pre class="ascii-art">{% get_ascii_art %}</pre>
+                <h1 class="mt-4 text-center">Welcome back, {{ user.username }}</h1>
+                <p class="text-muted text-center">What will you hack on today?</p>
+            </div>
+        </main>
+    </div>
+</div>
 {% endblock content %}

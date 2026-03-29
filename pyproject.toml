@@ -11,5 +11,7 @@ dependencies = [
     "django-tinymce>=4.1.0",
     "gunicorn>=23.0.0",
     "pytest>=8.4.1",
+    "pytest-cov>=6.0.0",
+    "pytest-django>=4.9.0",
     "ruff>=0.12.8",
 ]

@@ -1,44 +1,27 @@
 FROM python:3.13-slim-bookworm
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Download the latest installer
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
-
-# Run the installer then remove it
-RUN sh /uv-installer.sh && rm /uv-installer.sh
-
-# Ensure the installed binary is on the `PATH`
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never \
-    PATH="/root/.local/bin/:$PATH"
+    PYTHONUNBUFFERED=1 
 
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev
+
+COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /uvx /bin/
 COPY pyproject.toml uv.lock /_lock/
 
-# Synchronize dependencies.
-# This layer is cached until uv.lock or pyproject.toml change.
-RUN --mount=type=cache,target=/root/.cache \
-    cd /_lock && \
-    uv sync \
-    --frozen \
-    --no-install-project
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
 
-# Copy project
-COPY . /app
+ADD . /app
+WORKDIR /app
 
-# Install the project itself
-RUN --mount=type=cache,target=/root/.cache \
-    cd /app && uv sync --frozen
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser
@@ -49,9 +32,6 @@ RUN mkdir -p /app/data && \
 
 # Switch to non-root user
 USER appuser
-
-# Set working directory to the main app directory (not the Django subdirectory)
-WORKDIR /app
 
 # Expose port
 EXPOSE 8000

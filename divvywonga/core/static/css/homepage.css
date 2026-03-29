@@ -1,0 +1,134 @@
+.homepage-sidebar {
+    background: #f8f9fa;
+    min-height: calc(100vh - 56px);
+    border-right: 1px solid #dee2e6;
+    padding: 1rem 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem 1rem;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.homepage-sidebar .list-group-item {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+.homepage-sidebar .group-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.homepage-sidebar .group-link:hover {
+    color: #0d6efd;
+}
+
+.homepage-sidebar .group-link:hover .group-name {
+    text-decoration: underline;
+}
+
+.homepage-sidebar .group-name {
+    font-weight: 500;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.homepage-sidebar .role-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+}
+
+.homepage-sidebar .list-group-item small {
+    font-size: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid #dee2e6;
+    margin-top: 0.5rem;
+}
+
+.sidebar-footer .view-all-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #0d6efd;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.sidebar-footer .view-all-link:hover {
+    text-decoration: underline;
+}
+
+.sidebar-footer .badge {
+    font-size: 0.7rem;
+}
+
+.empty-state {
+    padding: 1rem;
+    text-align: center;
+}
+
+.empty-state p {
+    font-size: 0.85rem;
+}
+
+.ascii-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+}
+
+.ascii-art {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    color: #6c757d;
+    text-shadow: 0 0 10px rgba(108, 117, 125, 0.3);
+    white-space: pre;
+    margin: 0;
+}
+
+.homepage-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+@media (max-width: 991.98px) {
+    .homepage-sidebar {
+        display: none;
+    }
+    
+    .ascii-art {
+        font-size: 0.45rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ascii-container {
+        min-height: auto;
+        padding: 1rem 0;
+    }
+    
+    .ascii-art {
+        display: none;
+    }
+}
