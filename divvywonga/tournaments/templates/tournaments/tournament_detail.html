@@ -44,6 +44,10 @@
                 </form>
                 {% endif %}
             </div>
+            {% else %}
+            <a href="{% url 'tournaments:invite_to_tournament' group.id tournament.id %}" class="btn btn-outline-primary">
+                <i class="bi bi-person-plus me-1"></i>Invite
+            </a>
             {% endif %}
         </div>
     </div>
