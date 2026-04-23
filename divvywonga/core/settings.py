@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users",
+    "tournaments",
     "core",
     "crispy_forms",
     "crispy_bootstrap5",

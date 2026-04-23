@@ -5,7 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Sum
-from users.forms import UserRegisterForm, GroupCreateForm, GroupInviteForm
+from users.forms import (
+    UserRegisterForm,
+    GroupCreateForm,
+    GroupInviteForm,
+)
 from users.models import Group, Membership
 
 

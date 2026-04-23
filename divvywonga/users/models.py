@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Sum
 
 
 class Group(models.Model):
@@ -25,7 +26,7 @@ class Group(models.Model):
         verbose_name_plural = "Groups"
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def get_active_members(self):
         """Get all active members of this group."""
@@ -34,8 +35,8 @@ class Group(models.Model):
     def get_total_points(self):
         """Get total points for all members in this group."""
         return (
-            self.membership_set.filter(is_active=True).aggregate(
-                total=models.Sum("points")
+            Membership.objects.filter(group=self, is_active=True).aggregate(
+                total=Sum("points")
             )["total"]
             or 0
         )

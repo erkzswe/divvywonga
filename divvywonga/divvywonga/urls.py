@@ -24,5 +24,6 @@ urlpatterns = [
     path("", Index.as_view(), name="index"),
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
+    path("", include("tournaments.urls")),
     path("tinymce/", include("tinymce.urls")),
 ]

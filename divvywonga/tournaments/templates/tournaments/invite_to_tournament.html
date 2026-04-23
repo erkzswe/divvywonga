@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tournaments:group_tournaments' group.id %}">Tournaments</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}">{{ tournament.name }}</a></li>
+                    <li class="breadcrumb-item active">Invite</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Invite Users to Tournament</h4>
+                    <p class="mb-0 small">Invite group members to participate in {{ tournament.name }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Only group members can be invited to the tournament. 
+                        <a href="{% url 'invite_to_group' group.id %}">Invite users to the group first</a> if needed.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-2"></i>Invite Users
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
