@@ -1,0 +1,162 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:group_tournaments' group.id %}">Tournaments</a></li>
+            <li class="breadcrumb-item active">{{ tournament.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Tournament Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-2">
+                <i class="bi bi-trophy text-warning me-2"></i>{{ tournament.name }}
+            </h1>
+            <p class="text-muted">{{ tournament.description|default:"No description" }}</p>
+            <div class="mb-3">
+                <span class="badge bg-secondary me-1">{{ tournament.get_sport_type_display }}</span>
+                <span class="badge bg-info me-1">{{ tournament.get_tournament_type_display }}</span>
+                {% if tournament.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if user_membership.can_moderate or user_participation.can_moderate or user_membership.role == 'admin' %}
+            <div class="btn-group" role="group">
+                <a href="{% url 'tournaments:invite_to_tournament' group.id tournament.id %}" class="btn btn-outline-primary">
+                    <i class="bi bi-person-plus me-1"></i>Invite
+                </a>
+                {% if user_membership.role == 'admin' or user_participation.role == 'admin' %}
+                <form method="post" action="{% url 'tournaments:delete_tournament' group.id tournament.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this tournament?')">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% else %}
+            <a href="{% url 'tournaments:invite_to_tournament' group.id tournament.id %}" class="btn btn-outline-primary">
+                <i class="bi bi-person-plus me-1"></i>Invite
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tournament Dates -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-1">Start Date</h6>
+                    <p class="mb-0">{{ tournament.start_date|date:"F d, Y H:i" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-1">End Date</h6>
+                    <p class="mb-0">{{ tournament.end_date|date:"F d, Y H:i"|default:"Ongoing" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-people me-2"></i>Participants ({{ participants.count }})
+            </h5>
+            <span class="badge bg-primary">Total Points: {{ total_points }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if participants %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Points</th>
+                            <th>Joined</th>
+                            {% if user_participation and user_participation.role == 'admin' %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant in participants %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary rounded-circle text-white me-2">
+                                        {{ participant.user.username.0|upper }}
+                                    </div>
+                                    <span>{{ participant.user.username }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% if participant.role == 'admin' %}
+                                    <span class="badge bg-danger">Admin</span>
+                                {% elif participant.role == 'moderator' %}
+                                    <span class="badge bg-warning text-dark">Moderator</span>
+                                {% elif participant.role == 'predictor' %}
+                                    <span class="badge bg-info">Predictor</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Member</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ participant.points }}</strong></td>
+                            <td>{{ participant.joined_at|date:"M d, Y" }}</td>
+                            {% if user_participation and user_participation.role == 'admin' and participant.user != request.user %}
+                            <td>
+                                {% if participant.role != 'admin' %}
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Manage</button>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <p class="mb-0">No participants yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user_participation and user_participation.role != 'admin' %}
+    <div class="mt-4">
+        <form method="post" action="{% url 'tournaments:leave_tournament' group.id tournament.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to leave this tournament?')">
+                <i class="bi bi-box-arrow-left me-1"></i>Leave Tournament
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}

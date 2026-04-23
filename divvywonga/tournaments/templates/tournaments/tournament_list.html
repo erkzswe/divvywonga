@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if tournaments %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">Tournaments in {{ group.name }}</h1>
+        <p class="lead">All tournaments for this group</p>
+        <a href="{% url 'tournaments:create_tournament' group.id %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Create New Tournament
+        </a>
+        <a href="{% url 'group_detail' group.id %}" class="btn btn-outline-secondary ms-2">
+            <i class="bi bi-arrow-left me-2"></i>Back to Group
+        </a>
+    </div>
+{% endif %}
+
+    <!-- Tournaments List -->
+    {% if tournaments %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for tournament in tournaments %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h2 class="h4 card-title mb-0">
+                            <a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}" class="text-decoration-none text-dark">
+                                {{ tournament.name }}
+                            </a>
+                        </h2>
+                        <span class="badge bg-primary">
+                            {{ tournament.participant_count }} participant{{ tournament.participant_count|pluralize }}
+                        </span>
+                    </div>
+                    
+                    {% if tournament.description %}
+                    <p class="card-text text-muted mb-3">
+                        {{ tournament.description|truncatewords:30 }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <span class="badge bg-secondary me-1">{{ tournament.get_sport_type_display }}</span>
+                        <span class="badge bg-info">{{ tournament.get_tournament_type_display }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Started {{ tournament.start_date|timesince }} ago
+                        </small>
+                        <a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}" class="btn btn-sm btn-outline-primary">
+                            View Tournament <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-trophy display-1 text-muted"></i>
+        </div>
+        <h3 class="h4 mb-3">No tournaments yet</h3>
+        <p class="text-muted mb-4">Create a tournament to get started.</p>
+        <a href="{% url 'tournaments:create_tournament' group.id %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Create Your First Tournament
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: none;
+        border-radius: 0.75rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .card-title a {
+        transition: color 0.2s ease-in-out;
+    }
+    
+    .card-title a:hover {
+        color: #0d6efd !important;
+    }
+</style>
+{% endblock %}

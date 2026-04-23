@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New Tournament</h4>
+                    <p class="mb-0 small">Create a new tournament in {{ group.name }}</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="tournamentForm">
+                        {% csrf_token %}
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Tournament Information</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ form.name|as_crispy_field }}
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Tournament Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.sport_type|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.tournament_type|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.start_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.end_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'tournaments:group_tournaments' group.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-trophy"></i> Create Tournament
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
