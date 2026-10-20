@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:group_tournaments' group.id %}">Tournaments</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}">{{ tournament.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:match_list' group.id tournament.id %}">Matches</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Predict</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        {% if existing_prediction %}
+                        <i class="bi bi-pencil-square me-1"></i>Update Your Prediction
+                        {% else %}
+                        <i class="bi bi-cash-coin me-1"></i>Place Your Prediction
+                        {% endif %}
+                    </h4>
+                    <p class="mb-0 small">{{ tournament.name }} &middot; {{ group.name }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Match info -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-body">
+                            <h5 class="mb-1">
+                                <strong>{{ match.home_team }}</strong> vs <strong>{{ match.away_team }}</strong>
+                            </h5>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-clock me-1"></i>Kickoff: {{ match.kickoff|date:"F d, Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.predicted_home_score|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.predicted_away_score|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'tournaments:match_list' group.id tournament.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                {% if existing_prediction %}
+                                <i class="bi bi-check-lg"></i> Update Prediction
+                                {% else %}
+                                <i class="bi bi-cash-coin"></i> Place Prediction
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

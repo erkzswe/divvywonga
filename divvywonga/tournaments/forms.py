@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Tournament, TournamentParticipation
+from .models import Match, Prediction, Tournament, TournamentParticipation
 
 
 class TournamentCreateForm(forms.ModelForm):
@@ -123,3 +123,135 @@ class TournamentInviteForm(forms.Form):
                 raise ValidationError(f'"{email}" is not a valid email address')
 
         return emails
+
+
+class MatchCreateForm(forms.ModelForm):
+    """Form for creating a new match within a tournament."""
+
+    class Meta:
+        model = Match
+        fields = ["home_team", "away_team", "kickoff"]
+        widgets = {
+            "home_team": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter home team name",
+                }
+            ),
+            "away_team": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter away team name",
+                }
+            ),
+            "kickoff": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+        }
+        help_texts = {
+            "home_team": "The home team for this match.",
+            "away_team": "The away team for this match.",
+            "kickoff": "When the match kicks off.",
+        }
+
+    def clean_home_team(self):
+        return self.cleaned_data["home_team"].strip()
+
+    def clean_away_team(self):
+        return self.cleaned_data["away_team"].strip()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        home_team = cleaned_data.get("home_team")
+        away_team = cleaned_data.get("away_team")
+
+        if (
+            home_team
+            and away_team
+            and home_team.strip().lower() == away_team.strip().lower()
+        ):
+            raise ValidationError("Home and away teams must be different.")
+
+        return cleaned_data
+
+
+class MatchResultForm(forms.ModelForm):
+    """Form for entering or updating the result of a match."""
+
+    class Meta:
+        model = Match
+        fields = ["home_score", "away_score", "status"]
+        widgets = {
+            "home_score": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 0,
+                    "placeholder": "Home score",
+                }
+            ),
+            "away_score": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 0,
+                    "placeholder": "Away score",
+                }
+            ),
+            "status": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+        }
+        help_texts = {
+            "home_score": "Final home score (required for finished matches).",
+            "away_score": "Final away score (required for finished matches).",
+            "status": "Select the current status of the match.",
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        home_score = cleaned_data.get("home_score")
+        away_score = cleaned_data.get("away_score")
+        status = cleaned_data.get("status")
+
+        if status == "finished" and (home_score is None or away_score is None):
+            raise ValidationError(
+                "Both scores are required for a finished match."
+            )
+        if status != "finished" and (
+            home_score is not None or away_score is not None
+        ):
+            raise ValidationError("Scores can only be set for finished matches.")
+
+        return cleaned_data
+
+
+class PredictionForm(forms.ModelForm):
+    """Form for a user's score prediction on a match."""
+
+    class Meta:
+        model = Prediction
+        fields = ["predicted_home_score", "predicted_away_score"]
+        widgets = {
+            "predicted_home_score": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 0,
+                    "placeholder": "Predicted home score",
+                }
+            ),
+            "predicted_away_score": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 0,
+                    "placeholder": "Predicted away score",
+                }
+            ),
+        }
+        help_texts = {
+            "predicted_home_score": "Your predicted home score.",
+            "predicted_away_score": "Your predicted away score.",
+        }

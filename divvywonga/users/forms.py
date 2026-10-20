@@ -21,21 +21,7 @@ class GroupCreateForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        # Get all users except the current user for invitations
         if self.request and hasattr(self.request, "user"):
-            self.fields["invite_users"] = forms.ModelMultipleChoiceField(
-                queryset=User.objects.exclude(pk=self.request.user.pk),
-                required=False,
-                widget=forms.SelectMultiple(
-                    attrs={
-                        "class": "form-select",
-                        "data-choices": "data-choices",
-                        "data-options": '{"removeItemButton": true, "searchEnabled": true}',
-                    }
-                ),
-                help_text="Select users to invite to this group (optional)",
-            )
-
             # Add role selection for invited users
             self.fields["invite_role"] = forms.ChoiceField(
                 choices=Membership.ROLE_CHOICES[1:],  # Exclude 'admin' role for invites
