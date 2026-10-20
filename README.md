@@ -2,6 +2,12 @@
 
 A Django-based group trounament betting application.
 
+## Features
+
+- **Group-based betting:** Groups host tournaments; members join tournaments.
+- **Match predictions:** Admins create matches; members predict scores before kickoff.
+- **Automated scoring:** Results settle points (exact=3, outcome=1); leaderboard updates via tournament participants.
+
 ## Quick Start
 
 ```bash
@@ -52,12 +58,14 @@ docker compose exec api uv run ruff check --fix
 divvywonga/
 ├── core/           # Main app with index view
 ├── users/          # User authentication and group management
+├── tournaments/     # Tournaments, matches & predictions (betting)
 ├── data/           # SQLite database (persisted via Docker volume)
 └── manage.py       # Django management script
 
 tests/              # Test suite
 ├── core/           # Core app tests
 ├── users/          # Users app tests
+├── tournaments/    # Tournaments app tests
 └── integration/   # Integration tests
 ```
 
