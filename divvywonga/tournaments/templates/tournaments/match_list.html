@@ -1,0 +1,262 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:group_tournaments' group.id %}">Tournaments</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}">{{ tournament.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Matches</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 mb-1">
+                <i class="bi bi-calendar2-event text-primary me-2"></i>Matches
+            </h1>
+            <p class="text-muted mb-0">
+                {{ tournament.name }} &middot; {{ total_matches }} match{{ total_matches|pluralize }}
+            </p>
+        </div>
+        {% if is_moderator %}
+        <a href="{% url 'tournaments:create_match' group.id tournament.id %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Add Match
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Upcoming -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Upcoming ({{ upcoming|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if upcoming %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Match</th>
+                            <th>Kickoff</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in upcoming %}
+                        <tr>
+                            <td>
+                                <strong>{{ match.home_team }}</strong> vs <strong>{{ match.away_team }}</strong>
+                                {% if match.user_prediction %}
+                                <div class="small text-muted mt-1">
+                                    Your pick: {{ match.user_prediction.predicted_home_score }}&ndash;{{ match.user_prediction.predicted_away_score }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ match.kickoff|date:"F d, Y H:i" }}</td>
+                            <td><span class="badge bg-secondary">{{ match.get_status_display }}</span></td>
+                            <td class="text-end">
+                                {% if is_moderator %}
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#result-form-{{ match.id }}">
+                                    <i class="bi bi-pencil-square me-1"></i>Set Result
+                                </button>
+                                {% elif match.is_predictable %}
+                                <a href="{% url 'tournaments:predict' group.id tournament.id match.id %}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-cash-coin me-1"></i>Predict
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if is_moderator %}
+                        <tr class="collapse" id="result-form-{{ match.id }}">
+                            <td colspan="4" class="bg-light">
+                                <form method="post" action="{% url 'tournaments:set_match_result' group.id tournament.id match.id %}" class="row g-2 align-items-end">
+                                    {% csrf_token %}
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="home_score-{{ match.id }}">Home score</label>
+                                        <input type="number" min="0" class="form-control" id="home_score-{{ match.id }}" name="home_score" value="{{ match.home_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="away_score-{{ match.id }}">Away score</label>
+                                        <input type="number" min="0" class="form-control" id="away_score-{{ match.id }}" name="away_score" value="{{ match.away_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="status-{{ match.id }}">Status</label>
+                                        <select class="form-select" id="status-{{ match.id }}" name="status">
+                                            {% for value, label in match.STATUS_CHOICES %}
+                                            <option value="{{ value }}" {% if match.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-lg me-1"></i>Save
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar2-event fs-1 d-block mb-2"></i>
+                <p class="mb-0">No matches yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Finished -->
+    {% if finished %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-check2-circle me-2"></i>Finished ({{ finished|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Match</th>
+                            <th>Kickoff</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in finished %}
+                        <tr>
+                            <td><strong>{{ match.home_team }}</strong> vs <strong>{{ match.away_team }}</strong></td>
+                            <td>{{ match.kickoff|date:"F d, Y H:i" }}</td>
+                            <td><span class="badge bg-dark">{{ match.home_score }}&ndash;{{ match.away_score }}</span></td>
+                            <td><span class="badge bg-success">{{ match.get_status_display }}</span></td>
+                            <td class="text-end">
+                                {% if is_moderator %}
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#result-form-{{ match.id }}">
+                                    <i class="bi bi-pencil-square me-1"></i>Edit Result
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if is_moderator %}
+                        <tr class="collapse" id="result-form-{{ match.id }}">
+                            <td colspan="5" class="bg-light">
+                                <form method="post" action="{% url 'tournaments:set_match_result' group.id tournament.id match.id %}" class="row g-2 align-items-end">
+                                    {% csrf_token %}
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="home_score-{{ match.id }}">Home score</label>
+                                        <input type="number" min="0" class="form-control" id="home_score-{{ match.id }}" name="home_score" value="{{ match.home_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="away_score-{{ match.id }}">Away score</label>
+                                        <input type="number" min="0" class="form-control" id="away_score-{{ match.id }}" name="away_score" value="{{ match.away_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="status-{{ match.id }}">Status</label>
+                                        <select class="form-select" id="status-{{ match.id }}" name="status">
+                                            {% for value, label in match.STATUS_CHOICES %}
+                                            <option value="{{ value }}" {% if match.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-lg me-1"></i>Save
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Cancelled -->
+    {% if cancelled %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Cancelled ({{ cancelled|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Match</th>
+                            <th>Kickoff</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in cancelled %}
+                        <tr>
+                            <td><strong>{{ match.home_team }}</strong> vs <strong>{{ match.away_team }}</strong></td>
+                            <td>{{ match.kickoff|date:"F d, Y H:i" }}</td>
+                            <td><span class="badge bg-secondary text-muted">{{ match.get_status_display }}</span></td>
+                            <td class="text-end">
+                                {% if is_moderator %}
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#result-form-{{ match.id }}">
+                                    <i class="bi bi-pencil-square me-1"></i>Edit Result
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if is_moderator %}
+                        <tr class="collapse" id="result-form-{{ match.id }}">
+                            <td colspan="4" class="bg-light">
+                                <form method="post" action="{% url 'tournaments:set_match_result' group.id tournament.id match.id %}" class="row g-2 align-items-end">
+                                    {% csrf_token %}
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="home_score-{{ match.id }}">Home score</label>
+                                        <input type="number" min="0" class="form-control" id="home_score-{{ match.id }}" name="home_score" value="{{ match.home_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="away_score-{{ match.id }}">Away score</label>
+                                        <input type="number" min="0" class="form-control" id="away_score-{{ match.id }}" name="away_score" value="{{ match.away_score|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-1" for="status-{{ match.id }}">Status</label>
+                                        <select class="form-select" id="status-{{ match.id }}" name="status">
+                                            {% for value, label in match.STATUS_CHOICES %}
+                                            <option value="{{ value }}" {% if match.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-lg me-1"></i>Save
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'tournaments:tournament_detail' group.id tournament.id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Tournament
+    </a>
+</div>
+{% endblock %}
